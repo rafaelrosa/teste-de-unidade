@@ -7,6 +7,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.never;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -101,4 +102,26 @@ public class EncerradorDeLeilaoTest {
 		// and must be called with leilao1
 		verify(daoFalso, times(1)).atualiza(leilao1);
 	}
+	
+	@Test
+    public void mustNotFinishAuctionsThatStartedLessThanOneWeekBefore() {
+        Calendar ontem = Calendar.getInstance();
+        ontem.add(Calendar.DAY_OF_MONTH, -1);
+
+        Leilao leilao1 = new CriadorDeLeilao().para("TV de plasma").naData(ontem).constroi();
+        Leilao leilao2 = new CriadorDeLeilao().para("Geladeira").naData(ontem).constroi();
+
+        RepositorioDeLeiloes daoFalso = mock(LeilaoDao.class);
+        when(daoFalso.correntes()).thenReturn(Arrays.asList(leilao1, leilao2));
+
+        EncerradorDeLeilao encerrador = new EncerradorDeLeilao(daoFalso);
+        encerrador.encerra();
+
+        assertEquals(0, encerrador.getTotalEncerrados());
+        assertFalse(leilao1.isEncerrado());
+        assertFalse(leilao2.isEncerrado());
+        
+        verify(daoFalso, never()).atualiza(leilao1);
+        verify(daoFalso, never()).atualiza(leilao2);
+    }
 }
