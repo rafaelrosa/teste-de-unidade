@@ -5,6 +5,8 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.times;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -79,5 +81,24 @@ public class EncerradorDeLeilaoTest {
 		
 		// Best practice to test list: check length
 		assertEquals(0, encerrador.getTotalEncerrados());
+	}
+	
+	@Test
+	public void updateFinishedActions() {
+		Calendar antiga = Calendar.getInstance();
+		antiga.set(1999, 1, 20);
+		
+		Leilao leilao1 = new CriadorDeLeilao().para("TV de plasma").naData(antiga).constroi();
+		
+		RepositorioDeLeiloes daoFalso = mock(RepositorioDeLeiloes.class);
+		when(daoFalso.correntes()).thenReturn(Arrays.asList(leilao1));
+		
+		EncerradorDeLeilao encerrador = new EncerradorDeLeilao(daoFalso);
+		encerrador.encerra();
+		
+		// fail the test if this method is not invoked
+		// with times 1, we want only 1 invokation
+		// and must be called with leilao1
+		verify(daoFalso, times(1)).atualiza(leilao1);
 	}
 }
