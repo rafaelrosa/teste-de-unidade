@@ -34,7 +34,7 @@ public class EncerradorDeLeilao {
                     carteiro.envia(leilao);
                 }
         	} catch(Exception e) {
-        		// loga excecao e continua... 
+        		// logs exception and continues... 
         	}
             
         }
